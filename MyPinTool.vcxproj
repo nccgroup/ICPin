@@ -96,7 +96,8 @@
     <LibraryPath>D:\pin-3.0-76991-msvc-windows\intel64\runtime\pincrt;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>D:\pin-3.0-76991-msvc-windows\ia32\runtime\pincrt;D:\pin-3.0-76991-msvc-windows\ia32\lib\pincrt;D:\pin-3.0-76991-msvc-windows\ia32\lib-ext\pincrt;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\pin-3.2-81205-msvc-windows\ia32\lib;C:\pin-3.2-81205-msvc-windows\ia32\lib-ext;C:\pin-3.2-81205-msvc-windows\extras\xed-ia32\lib;C:\pin-3.2-81205-msvc-windows\ia32\runtime\pincrt;C:\pin-3.2-81205-msvc-windows\ia32\lib\pincrt;C:\pin-3.2-81205-msvc-windows\ia32\lib-ext\pincrt;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\pin-3.2-81205-msvc-windows\source\include\pin;C:\pin-3.2-81205-msvc-windows\source\include\pin\gen;C:\pin-3.2-81205-msvc-windows\source\tools\InstLib;C:\pin-3.2-81205-msvc-windows\extras\xed-ia32\include\xed;C:\pin-3.2-81205-msvc-windows\extras\components\include;C:\pin-3.2-81205-msvc-windows\extras\stlport\include;C:\pin-3.2-81205-msvc-windows\extras;C:\pin-3.2-81205-msvc-windows\extras\libstdc++\include;C:\pin-3.2-81205-msvc-windows\extras\crt\include;C:\pin-3.2-81205-msvc-windows\extras\crt;C:\pin-3.2-81205-msvc-windows\extras\crt\include\arch-x86;C:\pin-3.2-81205-msvc-windows\extras\crt\include\kernel\uapi;C:\pin-3.2-81205-msvc-windows\extras\crt\include\kernel\uapi\asm-x86;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
