@@ -20,32 +20,29 @@ VOID tracer::track(THREADID tid, ADDRINT addr)
 	return;
 }
 
-VOID tracer::trackdynamic(THREADID tid, CONTEXT *ctxt, ADDRINT esp, BOOL guard)
+VOID tracer::trackdynamic(THREADID tid, CONTEXT *ctxt, ADDRINT sp, BOOL guard)
 {
 	EXCEPTION_INFO exceptInfo;
-	ADDRINT eip, ret;
+	ADDRINT ip;
 
+	// Just print backtrace on how we got here
+	auto& trace = GetTrace(tid);
+	Util::Log(TRUE, "[DYNAMIC_CODE] Thread %p backtrace: ", tid);
+	for (auto addr : trace) {
+		Util::Log(FALSE, "-> %#p ", addr);
+	}
+	Util::Log(FALSE, "\n--------\n");
+
+	// Rethrow the guard page
 	if (guard) {
 		// Capture exception to-be address
-		eip = PIN_GetContextReg(ctxt, REG_EIP);
+		ip = PIN_GetContextReg(ctxt, REG_PC);
 		// Check the page for guard flag
-		Util::Log(TRUE, "[DYNAMIC_CODE] PAGE_GUARD AT %08x\n", eip);
-		// Read caller from stack
-		PIN_SafeCopy(&ret, (VOID*)esp, sizeof(ADDRINT));
-		// Change the context to point after call to dynamic code
-		PIN_SetContextReg(ctxt, REG_EIP, ret);
+		Util::Log(TRUE, "[DYNAMIC_CODE] PAGE_GUARD AT %p\n", ip);
 		// Initialize a PAGE_GUARD_EXCEPTION
-		PIN_InitWindowsExceptionInfo(&exceptInfo, STATUS_GUARD_PAGE_VIOLATION, eip, 0, NULL);
+		PIN_InitAccessFaultInfo(&exceptInfo, EXCEPTCODE_ACCESS_WINDOWS_GUARD_PAGE, ip, ip, FAULTY_ACCESS_EXECUTE);
+		//PIN_InitWindowsExceptionInfo(&exceptInfo, STATUS_GUARD_PAGE_VIOLATION, ip, 0, NULL);
 		PIN_RaiseException(ctxt, tid, &exceptInfo);
-	}
-	else {
-		// Just print backtrace on how we got here
-		auto& trace = GetTrace(tid);
-		Util::Log(TRUE, "[DYNAMIC_CODE] Thread %08x backtrace: ", tid);
-		for (auto addr : trace) {
-			Util::Log(FALSE, "-> %#p ", addr);
-		}
-		Util::Log(FALSE, "\n--------\n");
 	}
 	return;
 }
@@ -55,7 +52,7 @@ VOID tracer::LogCode(BBL bbl)
 {
 	INS ins = BBL_InsHead(bbl);
 	for (UINT i=0; i<BBL_NumIns(bbl); i++) {
-		Util::Log(TRUE, "[DYNAMIC_CODE] %08x: %s\n", INS_Address(ins), INS_Disassemble(ins).c_str());
+		Util::Log(TRUE, "[DYNAMIC_CODE] %p: %s\n", INS_Address(ins), INS_Disassemble(ins).c_str());
 		ins = INS_Next(ins);
 	}
 	return;
@@ -72,7 +69,7 @@ VOID tracer::Trace(TRACE trace, VOID *v)
 		if (tracking != NOTCODE) {
 			BBL_InsertCall(bbl, IPOINT_BEFORE, (AFUNPTR)track,
 				IARG_THREAD_ID,
-				IARG_UINT32, BBL_Address(bbl),
+				IARG_PTR, BBL_Address(bbl),
 				IARG_END);
 			if (tracking >= TRACKANDLOG) {
 				// Log the dynamic code found
@@ -81,7 +78,7 @@ VOID tracer::Trace(TRACE trace, VOID *v)
 				BBL_InsertCall(bbl, IPOINT_BEFORE, (AFUNPTR)trackdynamic,
 					IARG_THREAD_ID,
 					IARG_CONTEXT,
-					IARG_REG_VALUE, REG_ESP,
+					IARG_REG_VALUE, REG_SP,
 					IARG_BOOL, tracking==TRACK_LOG_RAISE,
 					IARG_END);
 			}
@@ -178,12 +175,12 @@ VOID tracer::addCodeRange(THREADID tid, ADDRINT start, ADDRINT end, WIN::DWORD p
 	Util::Log(TRUE, "[DYNAMIC_CODE] allocation backtrace: ");
 	auto& trace = GetTrace(tid);
 	for (auto addr : trace) {
-		Util::Log(FALSE, "-> %#p ", addr);
+		Util::Log(FALSE, "-> %p ", addr);
 	}
 	Util::Log(FALSE, "\n--------\n");
 	Util::Log(TRUE, "[LIST] List of dynamic code allocs:\n");
 	for (auto &range : dynamicCodeAllocs) {
-		Util::Log(TRUE, "%08x-%08x (%08x)\n", range.first, range.second.first, range.second.second);
+		Util::Log(TRUE, "%p-%p (%08x)\n", range.first, range.second.first, range.second.second);
 	}
 	Util::Log(TRUE, "[ENDLIST]\n");
 	return;

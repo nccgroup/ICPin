@@ -28,6 +28,14 @@ namespace WIN {
 }
 #define PAGE_ANYEXE (PAGE_EXECUTE|PAGE_EXECUTE_READ|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY)
 
+#ifdef _WIN64
+	#define REG_PC REG_RIP
+	#define REG_SP REG_RSP
+#else:
+	#define REG_PC REG_EIP
+	#define REG_SP REG_ESP
+#endif
+
 namespace Util {
 	// Vars
 	extern FILE *log;

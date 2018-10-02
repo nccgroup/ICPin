@@ -28,27 +28,40 @@ VOID ad_hook::HookInterrupt(ad_hook *adf, THREADID tid)
 }
 
 // TODO: CHECK FOR INSTRUCTION SIZE (this hack is incompatible with 0xcc)
-VOID ad_hook::HookUserException(ad_hook *adf, THREADID tid, ADDRINT esp)
+VOID ad_hook::HookUserException(ad_hook *adf, THREADID tid, ADDRINT sp)
 {
 	// Calling convention is unorthodox
 	// TODO: USE SAFE_COPY
-	WIN::_EXCEPTION_RECORD *er = *(WIN::_EXCEPTION_RECORD**)esp;
-	WIN::_CONTEXT *context = *(WIN::_CONTEXT **)(esp+0x4);
+#ifdef _WIN64
+	WIN::_CONTEXT *context = (WIN::_CONTEXT *)(sp);
+	WIN::EXCEPTION_RECORD64 *er = (WIN::EXCEPTION_RECORD64*)(sp+0x4F0);
+	ADDRINT *pPc = &context->Rip;
+#else
+	WIN::_EXCEPTION_RECORD *er = *(WIN::_EXCEPTION_RECORD**)sp;
+	WIN::_CONTEXT *context = *(WIN::_CONTEXT **)(sp + 0x4);
+	ADDRINT *pPc = (ADDRINT*)&context->Eip;
+#endif // WIN64
+
 	// Replaces context before function goes through
 	if (er->ExceptionCode == EXCEPTION_BREAKPOINT) {
-		Util::Log(TRUE, "[KiUserExceptionDispatcher] Back from km, context EIP = %08x -> %08x\n", context->Eip, context->Eip+1);
-		context->Eip++;
+		Util::Log(TRUE, "[KiUserExceptionDispatcher] Back from km, context IP = %p -> %p\n", *pPc, (*pPc)+1);
+		(*pPc)++;
 		Util::Log(TRUE, "----------------------\n");
 	}
 	else if (er->ExceptionCode == STATUS_GUARD_PAGE_VIOLATION) {
-		Util::Log(TRUE, "[KiUserExceptionDispatcher] Guard page accessed at EIP = %08x\n", context->Eip);
+		Util::Log(TRUE, "[KiUserExceptionDispatcher] Guard page accessed at IP = %p\n", *pPc);
 		Util::Log(TRUE, "----------------------\n");
 	}
+	else {
+		Util::Log(TRUE, "[KiUserExceptionDispatcher] Exception %x at IP = %p\n", er->ExceptionCode, *pPc);
+		Util::Log(TRUE, "----------------------\n");
+	}
+	return;
 }
 
 VOID ad_hook::HookVirtualAlloc(ad_hook *adf, THREADID tid, WIN::SIZE_T dwSize, WIN::DWORD protect)
 {
-	//Util::Log(TRUE, "[VirtualAlloc] TID %#x call at bbl & = %08x (protect %08x)\n", tid, tracer::GetCurrentBBL(tid), protect);
+	//Util::Log(TRUE, "[VirtualAlloc] TID %#x call at bbl %p (protect %08x)\n", tid, tracer::GetCurrentBBL(tid), protect);
 	// Keep a per-thread ref to the call in order to link with post
 	adf->allocs[tid].first = dwSize;
 	adf->allocs[tid].second = protect;
@@ -213,7 +226,7 @@ VOID ad_hook::instrumentRoutine(RTN rtn) const
 		RTN_InsertCall(rtn, IPOINT_BEFORE, hook,
 			IARG_PTR, this,
 			IARG_THREAD_ID,
-			IARG_REG_VALUE, REG_ESP,
+			IARG_REG_VALUE, REG_SP,
 			IARG_END);
 		break;
 	case VMALLOC:

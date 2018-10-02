@@ -25,6 +25,7 @@ VOID Image(IMG img, VOID *v)
 	// Get the image name
 	string imageName = imagePath.substr(IMG_Name(img).rfind("\\") + 1);
 	Util::Log(TRUE, "[LOAD] %s [%p - %p]\n", imagePath.c_str(), IMG_LowAddress(img), IMG_HighAddress(img));
+	// TODO: Allow command line parametrization (for dlls)
 	if (knob_imageName.Value().empty() && IMG_IsMainExecutable(img)
 		|| (Util::StrtoLower(knob_imageName.Value()) == Util::StrtoLower(imageName))) {
 		// TODO: HANDLE CODE RUN FROM RDATA AND OTHER SECTIONS
@@ -69,22 +70,21 @@ VOID exhandler(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT
 			}
 			break;
 		case 0x4001000a:
-			// TODO: Print unicode debug output
+			// TODO: Print unicode debug output?
 			break;
 		case EXCEPTION_BREAKPOINT:
 		case STATUS_GUARD_PAGE_VIOLATION:
-			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %#p -> %#p\n", info, PIN_GetContextReg(from, REG_EIP), PIN_GetContextReg(to, REG_EIP));
+			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
 			break;
 		case EXCEPTION_ACCESS_VIOLATION:
-			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %#p -> %#p\n", info, PIN_GetContextReg(from, REG_EIP), PIN_GetContextReg(to, REG_EIP));
+			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
 			Util::printContext(from, 40);
 			trace = tracer::GetTrace(threadIndex);
 			Util::Log(TRUE, "[%#x] ", threadIndex);
 			for (auto &addr : trace) {
-				Util::Log(TRUE, "%08x ", addr);
+				Util::Log(TRUE, "%p ", addr);
 			}
 			Util::Log(TRUE, "\n");
-			//Fini(EXCEPTION_ACCESS_VIOLATION, NULL);
 			break;
 		default:
 			Util::printContext(from, 0);

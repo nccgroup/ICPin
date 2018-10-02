@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,6 +22,7 @@
     <ProjectGuid>{639EF517-FCFC-408E-9500-71F0DC0458DB}</ProjectGuid>
     <RootNamespace>MyPinTool</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -33,7 +34,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -44,7 +45,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -93,11 +94,11 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>D:\pin-3.0-76991-msvc-windows\intel64\runtime\pincrt;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\pin-3.2-81205-msvc-windows\intel64\runtime\pincrt;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\pin-3.2-81205-msvc-windows\source\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>C:\pin-3.2-81205-msvc-windows\ia32\lib;C:\pin-3.2-81205-msvc-windows\ia32\lib-ext;C:\pin-3.2-81205-msvc-windows\extras\xed-ia32\lib;C:\pin-3.2-81205-msvc-windows\ia32\runtime\pincrt;C:\pin-3.2-81205-msvc-windows\ia32\lib\pincrt;C:\pin-3.2-81205-msvc-windows\ia32\lib-ext\pincrt;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\pin-3.2-81205-msvc-windows\source\include\pin;C:\pin-3.2-81205-msvc-windows\source\include\pin\gen;C:\pin-3.2-81205-msvc-windows\source\tools\InstLib;C:\pin-3.2-81205-msvc-windows\extras\xed-ia32\include\xed;C:\pin-3.2-81205-msvc-windows\extras\components\include;C:\pin-3.2-81205-msvc-windows\extras\stlport\include;C:\pin-3.2-81205-msvc-windows\extras;C:\pin-3.2-81205-msvc-windows\extras\libstdc++\include;C:\pin-3.2-81205-msvc-windows\extras\crt\include;C:\pin-3.2-81205-msvc-windows\extras\crt;C:\pin-3.2-81205-msvc-windows\extras\crt\include\arch-x86;C:\pin-3.2-81205-msvc-windows\extras\crt\include\kernel\uapi;C:\pin-3.2-81205-msvc-windows\extras\crt\include\kernel\uapi\asm-x86;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>D:\pin-3.0-76991-msvc-windows\ia32\runtime\pincrt;D:\pin-3.0-76991-msvc-windows\ia32\lib\pincrt;D:\pin-3.0-76991-msvc-windows\ia32\lib-ext\pincrt;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -78,6 +78,28 @@ namespace Util {
 		return ret;
 	}
 
+#if _WIN64
+	VOID printContext(const CONTEXT *ctx, UINT32 c)
+	{
+		Log(TRUE, "RAX = %p\tRBX = %p\tRCX = %p\nRDX = %p\tRSI = %p\tRDI = %p\nRBP = %p\tRSP = %p\tRIP = %p\n",
+			PIN_GetContextReg(ctx, REG_RAX),
+			PIN_GetContextReg(ctx, REG_RBX),
+			PIN_GetContextReg(ctx, REG_RCX),
+			PIN_GetContextReg(ctx, REG_RDX),
+			PIN_GetContextReg(ctx, REG_RSI),
+			PIN_GetContextReg(ctx, REG_RDI),
+			PIN_GetContextReg(ctx, REG_RBP),
+			PIN_GetContextReg(ctx, REG_RSP),
+			PIN_GetContextReg(ctx, REG_RIP));
+		// TODO: use the safe copy API
+		//UINT count = ((c == -1) ? ((PIN_GetContextReg(ctx, REG_RBP)-PIN_GetContextReg(ctx, REG_RSP))/sizeof(ADDRINT))+1 : c);
+		//ADDRINT *ptr = (ADDRINT*)PIN_GetContextReg(ctx, REG_RSP);
+		//for (UINT32 i = 0; i < count; i++) {
+		//	Log(TRUE, "[%08x]: %08x\n", ptr, *ptr);
+		//	ptr++;
+		//}
+	}
+#else
 	VOID printContext(const CONTEXT *ctx, UINT32 c)
 	{
 		Log(TRUE, "EAX = %08x\tEBX = %08x\tECX = %08x\nEDX = %08x\tESI = %08x\tEDI = %08x\nEBP = %08x\tESP = %08x\tEIP = %08x\n",
@@ -91,11 +113,12 @@ namespace Util {
 			PIN_GetContextReg(ctx, REG_ESP),
 			PIN_GetContextReg(ctx, REG_EIP));
 		// TODO: use the safe copy API
-		UINT count = ((c == -1) ? ((PIN_GetContextReg(ctx, REG_EBP)-PIN_GetContextReg(ctx, REG_ESP))/sizeof(VOID*))+1 : c);
+		UINT count = ((c == -1) ? ((PIN_GetContextReg(ctx, REG_EBP) - PIN_GetContextReg(ctx, REG_ESP)) / sizeof(VOID*)) + 1 : c);
 		ADDRINT *ptr = (ADDRINT*)PIN_GetContextReg(ctx, REG_ESP);
 		for (UINT32 i = 0; i < count; i++) {
 			Log(TRUE, "[%08x]: %08x\n", ptr, *ptr);
 			ptr++;
 		}
 	}
+#endif
 }
