@@ -7,29 +7,6 @@ namespace Util {
 	string imageName;
 	ADDRINT base, start, end, entry;
 
-	// This is quick (?)
-	UINT64 __inline Util::READ_SIZE(ADDRINT ptr, size_t size)
-	{
-		size_t ret;
-		switch (size) {
-		case 1:
-			ret = (*(CHAR*)ptr);
-			break;
-		case 2:
-			ret = (*(unsigned short*)ptr);
-			break;
-		case 4:
-			ret = (*(unsigned long*)ptr);
-			break;
-		case 8:
-			ret = (*(UINT64*)ptr);
-			break;
-		default:
-			break;
-		}
-		return ret;
-	}
-
 	VOID loginit(string filename)
 	{
 		log = fopen(filename.c_str(), "w");

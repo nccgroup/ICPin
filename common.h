@@ -1,4 +1,5 @@
 #pragma once
+
 // Standard C
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,13 +20,13 @@
 #define WRITE 1
 #define OTHER 2
 
+typedef unsigned long DWORD;
 namespace WIN {
-#define _WINDOWS_H_PATH_ C:\Program Files (x86)\Windows Kits\8.1\Include\um
+#pragma once
+#define _WINDOWS_H_PATH_ C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\um
 #include <windows.h>
-#define	EXCEPTION_BREAKPOINT 0x80000003
-#define	STATUS_GUARD_PAGE_VIOLATION 0x80000001
-#define EXCEPTION_ACCESS_VIOLATION 0xc0000005
 }
+
 #define PAGE_ANYEXE (PAGE_EXECUTE|PAGE_EXECUTE_READ|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY)
 
 #ifdef _WIN64

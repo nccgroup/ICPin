@@ -40,7 +40,7 @@ public:
 	// Constructor
 	ad_hook(enum TYPE, string, string, AFUNPTR);
 	ad_hook(enum TYPE, string, string, AFUNPTR, AFUNPTR);
-	ad_hook(TYPE, string, AFUNPTR);
+	ad_hook(enum TYPE, string, AFUNPTR);
 	// Members
 	VOID instrumentRoutine(RTN) const;
 	VOID PrintTrace(BOOL) const;

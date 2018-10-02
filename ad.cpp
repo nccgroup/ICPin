@@ -58,10 +58,9 @@ VOID ad_hook::HookInterrupt(ad_hook *adf, CONTEXT *ctxt, THREADID tid)
 	return;
 }
 
-
 VOID ad_hook::HookVirtualAlloc(ad_hook *adf, THREADID tid, WIN::SIZE_T dwSize, WIN::DWORD protect)
 {
-	Util::Log(TRUE, "[VirtualAlloc] TID %#x call at bbl %p (protect %08x)\n", tid, tracer::GetCurrentBBL(tid), protect);
+	//Util::Log(TRUE, "[VirtualAlloc] TID %#x call at bbl %p (protect %08x)\n", tid, tracer::GetCurrentBBL(tid), protect);
 	// Keep a per-thread ref to the call in order to link with post
 	adf->allocs[tid].first = dwSize;
 	adf->allocs[tid].second = protect;
