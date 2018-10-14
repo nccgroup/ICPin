@@ -19,49 +19,49 @@ ad_hook::ad_hook(enum TYPE t, string n, string d, AFUNPTR h, AFUNPTR p) : type(t
 // instruction hook ad constructor
 ad_hook::ad_hook(enum TYPE t, string n, AFUNPTR h) : type(t), name(n), hook(h), dll(string("nope.dll")), genre(INSTRUCTION) {}
 
-VOID ad_hook::HookInterrupt(ad_hook *adf, THREADID tid)
+//#define EMULATE_WINDOWS_BOTCHED_LONG_INT
+VOID ad_hook::HookInterrupt(ad_hook *adf, CONTEXT *ctxt, THREADID tid)
 {
-	Util::Log(TRUE, "[Interrupt] Using software interrupts to detect debugger\n");
-	// TODO: HANDLE int 2d -- eip -= 1 AND/OR INS_Delete?
+	UINT8 op, intcode=3; // default to int 3
+	EXCEPTION_INFO exceptInfo;
+	ADDRINT ip = PIN_GetContextReg(ctxt, REG_PC);
+
 	adf->UpdateTrace(tracer::GetTrace(tid));
-	return;
-}
-
-// TODO: CHECK FOR INSTRUCTION SIZE (this hack is incompatible with 0xcc)
-VOID ad_hook::HookUserException(ad_hook *adf, THREADID tid, ADDRINT sp)
-{
-	// Calling convention is unorthodox
-	// TODO: USE SAFE_COPY
-#ifdef _WIN64
-	WIN::_CONTEXT *context = (WIN::_CONTEXT *)(sp);
-	WIN::EXCEPTION_RECORD64 *er = (WIN::EXCEPTION_RECORD64*)(sp+0x4F0);
-	ADDRINT *pPc = &context->Rip;
+	// Fire a replacement interrupt to the OS if long int
+	PIN_SafeCopy(&op, (VOID*)ip, sizeof(op));
+	if (op == 0xCD) {
+		PIN_SafeCopy(&intcode, (VOID*)(ip + 1), sizeof(op));
+		if (intcode == 0x3 || intcode == 0x2d) {
+			// Log and trace
+			Util::Log(TRUE, "[INT] Using software interrupt (OP: #%x, INT #%x) at %p\n", op, intcode, ip);
+			PIN_InitExceptionInfo(&exceptInfo, EXCEPTCODE_DBG_BREAKPOINT_TRAP, ip);
+#ifndef EMULATE_WINDOWS_BOTCHED_LONG_INT
+	// Default: NOT emulating windows botched behavior
+	#ifdef _WIN64
+			PIN_SetContextReg(ctxt, REG_PC, ip + 3); // Context points after the interrupt instruction
+	#else
+			PIN_SetContextReg(ctxt, REG_PC, ip + 2); // Context points after the interrupt instruction
+	#endif
 #else
-	WIN::_EXCEPTION_RECORD *er = *(WIN::_EXCEPTION_RECORD**)sp;
-	WIN::_CONTEXT *context = *(WIN::_CONTEXT **)(sp + 0x4);
-	ADDRINT *pPc = (ADDRINT*)&context->Eip;
-#endif // WIN64
-
-	// Replaces context before function goes through
-	if (er->ExceptionCode == EXCEPTION_BREAKPOINT) {
-		Util::Log(TRUE, "[KiUserExceptionDispatcher] Back from km, context IP = %p -> %p\n", *pPc, (*pPc)+1);
-		(*pPc)++;
-		Util::Log(TRUE, "----------------------\n");
+	// EMULATING windows botched behavior
+	#ifdef _WIN64
+			PIN_SetContextReg(ctxt, REG_PC, ip + 2); // Context points in the middle of the instruction
+	#else
+			PIN_SetContextReg(ctxt, REG_PC, ip + 1); // Context points in the middle of the instruction
+	#endif
+#endif
+			PIN_RaiseException(ctxt, tid, &exceptInfo);
+		}
 	}
-	else if (er->ExceptionCode == STATUS_GUARD_PAGE_VIOLATION) {
-		Util::Log(TRUE, "[KiUserExceptionDispatcher] Guard page accessed at IP = %p\n", *pPc);
-		Util::Log(TRUE, "----------------------\n");
-	}
-	else {
-		Util::Log(TRUE, "[KiUserExceptionDispatcher] Exception %x at IP = %p\n", er->ExceptionCode, *pPc);
-		Util::Log(TRUE, "----------------------\n");
-	}
+	// Log and trace
+	Util::Log(TRUE, "[INTERRUPT] Using software interrupt (OP: #%x, INT #%x) at %p\n", op, intcode, ip);
 	return;
 }
+
 
 VOID ad_hook::HookVirtualAlloc(ad_hook *adf, THREADID tid, WIN::SIZE_T dwSize, WIN::DWORD protect)
 {
-	//Util::Log(TRUE, "[VirtualAlloc] TID %#x call at bbl %p (protect %08x)\n", tid, tracer::GetCurrentBBL(tid), protect);
+	Util::Log(TRUE, "[VirtualAlloc] TID %#x call at bbl %p (protect %08x)\n", tid, tracer::GetCurrentBBL(tid), protect);
 	// Keep a per-thread ref to the call in order to link with post
 	adf->allocs[tid].first = dwSize;
 	adf->allocs[tid].second = protect;
@@ -273,6 +273,7 @@ VOID ad_hook::instrumentInstruction(INS ins, VOID *v)
 			if (ref != ad_functions.end()) {
 				INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)HookInterrupt,
 					IARG_PTR, &*ref,
+					IARG_CONTEXT,
 					IARG_THREAD_ID,
 					IARG_END);
 			}
@@ -288,7 +289,6 @@ VOID ad_hook::setup()
 	ad_functions.insert(ad_hook(CLOSEHANDLE, string("CloseHandle"), string("kernelbase.dll"), (AFUNPTR)HookCloseHandle));
 	ad_functions.insert(ad_hook(NTQIP, string("NtQueryInformationProcess"), string("ntdll.dll"), (AFUNPTR)HookNtQueryInformationProcess));
 	ad_functions.insert(ad_hook(NTQOB, string("NtQueryObject"), string("ntdll.dll"), (AFUNPTR)HookNtQueryObject));
-	ad_functions.insert(ad_hook(UEXCEPT, string("KiUserExceptionDispatcher"), string("ntdll.dll"), (AFUNPTR)HookUserException));
 	ad_functions.insert(ad_hook(VMALLOC, string("VirtualAlloc"), string("kernelbase.dll"), (AFUNPTR)HookVirtualAlloc, (AFUNPTR)PostVirtualAlloc));
 	ad_functions.insert(ad_hook(VMFREE, string("VirtualFree"), string("kernelbase.dll"), (AFUNPTR)HookVirtualFree));
 	ad_functions.insert(ad_hook(VMPROT, string("VirtualProtect"), string("kernelbase.dll"), (AFUNPTR)HookVirtualProtect));

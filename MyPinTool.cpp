@@ -73,8 +73,10 @@ VOID exhandler(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT
 			// TODO: Print unicode debug output?
 			break;
 		case EXCEPTION_BREAKPOINT:
+			Util::Log(TRUE, "[EXCEPTION_BREAKPOINT] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
+			break;
 		case STATUS_GUARD_PAGE_VIOLATION:
-			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
+			Util::Log(TRUE, "[STATUS_GUARD_PAGE_VIOLATION] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
 			break;
 		case EXCEPTION_ACCESS_VIOLATION:
 			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
@@ -87,6 +89,7 @@ VOID exhandler(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT
 			Util::Log(TRUE, "\n");
 			break;
 		default:
+			Util::Log(TRUE, "[EXCEPTION] code: %#x\tip: %p -> %p\n", info, PIN_GetContextReg(from, REG_PC), PIN_GetContextReg(to, REG_PC));
 			Util::printContext(from, 0);
 			break;
 		}

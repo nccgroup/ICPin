@@ -52,9 +52,8 @@ public:
 	// Hooks (have to be static)
 	static VOID HookCloseHandle(ad_hook*, THREADID, ADDRINT);
 	static VOID HookNtQueryInformationProcess(ad_hook*, THREADID, UINT32, UINT32);
-	static VOID HookInterrupt(ad_hook*, THREADID);
+	static VOID HookInterrupt(ad_hook*, CONTEXT*, THREADID);
 	static VOID HookNtQueryObject(ad_hook*, THREADID, ADDRINT, ADDRINT, ADDRINT, ADDRINT);
-	static VOID HookUserException(ad_hook*, THREADID, ADDRINT);
 	static VOID HookVirtualAlloc(ad_hook*, THREADID, WIN::SIZE_T, WIN::DWORD);
 	static VOID HookVirtualProtect(ad_hook*, THREADID, ADDRINT, WIN::DWORD);
 	static VOID HookVirtualFree(ad_hook*, THREADID, WIN::LPVOID);
