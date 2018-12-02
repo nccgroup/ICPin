@@ -20,7 +20,7 @@ class ReadGadget : public Gadget
 public:
 	// [start, end)
 	pair<ADDRINT, ADDRINT> range;
-	ReadGadget(INT, ADDRINT, ADDRINT, ADDRINT);
+	ReadGadget(ADDRINT, ADDRINT, ADDRINT);
 	VOID update_range(ADDRINT, ADDRINT);
 	VOID print() const;
 };
@@ -29,8 +29,8 @@ class WriteGadget : public Gadget
 {
 public:
 	size_t len;
-	tr1::unordered_map<ADDRINT, std::tr1::unordered_set<UINT64>> offset_values;
-	WriteGadget(INT, ADDRINT, ADDRINT, UINT64, size_t);
+	tr1::unordered_map<ADDRINT, std::vector<UINT64>> offset_values;
+	WriteGadget(ADDRINT, ADDRINT, UINT64, size_t);
 	VOID update_offset_values(ADDRINT, UINT64);
 	VOID print() const;
 };

@@ -4,7 +4,7 @@ volatile size_t Gadget::current = 0;
 
 // ReadGadget
 
-ReadGadget::ReadGadget(INT t, ADDRINT i, ADDRINT start, ADDRINT end) : Gadget(t, i) {
+ReadGadget::ReadGadget(ADDRINT i, ADDRINT start, ADDRINT end) : Gadget(READ, i) {
 	range.first = start;
 	range.second = end;
 }
@@ -28,13 +28,13 @@ VOID ReadGadget::print() const {
 
 // WriteGadget
 
-WriteGadget::WriteGadget(INT t, ADDRINT i, ADDRINT o, UINT64 val, size_t l) : Gadget(t, i) {
+WriteGadget::WriteGadget(ADDRINT i, ADDRINT o, UINT64 val, size_t l) : Gadget(WRITE, i) {
 	len = l;
-	offset_values[o].insert(val);
+	offset_values[o].push_back(val);
 }
 
 VOID WriteGadget::update_offset_values(ADDRINT address, UINT64 value) {
-	offset_values[address].insert(value);
+	offset_values[address].push_back(value);
 }
 
 VOID WriteGadget::print() const {

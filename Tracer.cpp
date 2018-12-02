@@ -211,8 +211,8 @@ VOID tracer::UpdateCodeRangeProtect(ADDRINT address, WIN::DWORD protect)
 // Last pass to get final writes
 VOID tracer::GetLastMemState()
 {
-	UINT64 val = 0;
 	for (auto& g : gadgets) {
+		UINT64 val = 0;
 		if (g.second->type == WRITE) {
 			WriteGadget *wg = static_cast<WriteGadget*>(g.second);
 			for (auto& p : wg->offset_values) {
@@ -231,13 +231,13 @@ VOID tracer::RecordMemAccess(ADDRINT ip, ADDRINT addr, size_t size, INT type)
 	auto& it = gadgets.find(ip);
 	if (it == gadgets.end()) {
 		if (type == READ) {
-			ReadGadget *rg = new ReadGadget(type, ip, addr, addr + size);
+			ReadGadget *rg = new ReadGadget(ip, addr, addr + size);
 			gadgets.insert(pair<ADDRINT, Gadget*>(ip, rg));
 		}
 		else {
 			// Write gadget
 			PIN_SafeCopy(&val, (VOID*)addr, size);
-			WriteGadget *wg = new WriteGadget(type, ip, addr, val, size);
+			WriteGadget *wg = new WriteGadget(ip, addr, val, size);
 			gadgets.insert(pair<ADDRINT, Gadget*>(ip, wg));
 		}
 		Gadget::current++;
