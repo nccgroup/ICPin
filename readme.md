@@ -17,6 +17,14 @@ behavior.
 ### Running ###
 `pin -t path/to/ICPin.dll -- /path/to/target/executable`
 
+### Importing Results In Python ###
+```python
+from icpin_importer import Importer
+
+imp = Importer('/path/to/pinatrace.out')
+gadgets = imp.loadDB()
+```
+
 ### Ouput Sample (edited) ###
 ```
 [LOAD] c:\Program Files (x86)\ExEPath\Exe.exe [0x620000 - 0xc89fff]
